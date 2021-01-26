@@ -37,6 +37,22 @@ let resources = [
       'ru-hexlet-io-assets-professions-nodejs.png',
     ),
   },
+  {
+    format: 'js',
+    urlPath: '/packs/js/runtime.js',
+    filename: path.join(
+      assetsPath,
+      'ru-hexlet-io-packs-js-runtime.js',
+    ),
+  },
+  {
+    format: 'css',
+    urlPath: '/assets/application.css',
+    filename: path.join(
+      assetsPath,
+      'ru-hexlet-io-assets-application.css',
+    ),
+  },
 ];
 const formats = resources.map(({ format }) => format);
 const textFormats = [];
@@ -47,7 +63,7 @@ beforeAll(async () => {
   outputHTML = await fs.readFile(getFixturePath(outputHTMLFile), 'utf-8');
   scope.get('/courses').reply(200, inputHTML, { 'Access-Control-Allow-Origin': '*' });
 
-  const promises = resources.map((res) => fs.readFile(getFixturePath(res.filename))
+  const promises = resources.map((res) => fs.readFile(getFixturePath(res.filename), 'utf-8')
     .then((data) => ({ ...res, data })));
   resources = await Promise.all(promises);
   resources.forEach(({ urlPath, data }) => scope.get(urlPath).reply(200, data));
@@ -75,7 +91,7 @@ describe('positive cases', () => {
     expect(fileWasCreated).toBe(true);
 
     if (textFormats.includes(format)) {
-      const actualContent = await fs.readFile(path.join(outputDir, filename));
+      const actualContent = await fs.readFile(path.join(outputDir, filename), 'utf-8');
       expect(actualContent).toEqual(data);
     }
   });

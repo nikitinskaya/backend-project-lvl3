@@ -13,6 +13,11 @@
   "scripts": {
     "test": "npx jest"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {},
+    "testMatch": ["**/?(*.)+(spec|test).[jt]s?(x)"]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nikitinskaya/backend-project-lvl3.git"

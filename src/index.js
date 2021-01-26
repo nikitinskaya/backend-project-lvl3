@@ -18,9 +18,15 @@ const processAssets = (data, assetspath, link) => {
   const $ = cheerio.load(data);
   const tags = {
     img: 'src',
+    link: 'href',
+    script: 'src',
   };
   const assetsLinks = Object.entries(tags).flatMap(([tag, attr]) => $(`${tag}[${attr}]`)
     .toArray()
+    .filter((el) => {
+      const url = new URL($(el).attr(attr), link);
+      return link === url.origin;
+    })
     .map((el) => {
       const elPath = $(el).attr(attr);
       const url = new URL(elPath, link);
@@ -39,6 +45,7 @@ const processAssets = (data, assetspath, link) => {
 
 const pageLoader = (link, outputDir) => {
   const fileLink = new URL(link);
+  const { origin } = fileLink;
   const fileLinkWithoutProto = `${fileLink.hostname}${fileLink.pathname}`;
   const filename = getResourceName(fileLinkWithoutProto);
   const assetsDir = getResourceName(fileLinkWithoutProto, '_files');
@@ -47,7 +54,7 @@ const pageLoader = (link, outputDir) => {
 
   return download(link)
     .then((data) => fs.mkdir(assetspath).then(() => data))
-    .then((data) => processAssets(data, assetsDir, link))
+    .then((data) => processAssets(data, assetsDir, origin))
     .then(({ page, assetsLinks }) => fs.writeFile(filepath, page, { encoding: 'utf-8' })
       .then(() => assetsLinks))
     .then((assetsLinks) => {
