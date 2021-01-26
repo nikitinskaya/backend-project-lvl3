@@ -38,7 +38,7 @@ const processAssets = (data, assetspath, link) => {
       const elPath = $(el).attr(attr);
       const url = new URL(elPath, link);
       const fileLink = `${url.hostname}${url.pathname}`;
-      const relativePath = path.join(assetspath, getResourceName(fileLink, path.parse(elPath).ext));
+      const relativePath = path.join(assetspath, getResourceName(fileLink, path.parse(elPath).ext || '.html'));
       $(el).attr(attr, relativePath);
       return {
         relativePath,

@@ -54,6 +54,14 @@ let resources = [
       'ru-hexlet-io-assets-application.css',
     ),
   },
+  {
+    format: 'html',
+    urlPath: '/courses',
+    filename: path.join(
+      assetsPath,
+      'ru-hexlet-io-courses.html',
+    ),
+  },
 ];
 const formats = resources.map(({ format }) => format);
 const textFormats = [];
