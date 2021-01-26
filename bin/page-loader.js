@@ -8,8 +8,12 @@ program
   .description('Downloads web pages with resources')
   .option('-o, --output <dirPath>', 'output dir path', process.cwd())
   .arguments('<link>')
-  .action(async (url, { output }) => {
-    const name = await pageLoader(url, output);
-    console.log(name);
+  .action((url, { output }) => {
+    pageLoader(url, output)
+      .then((name) => console.log(name))
+      .catch((err) => {
+        console.error(err);
+        process.exit(1);
+      });
   });
 program.parse(process.argv);

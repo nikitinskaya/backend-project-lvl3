@@ -15,7 +15,10 @@ const getResourceName = (link, postfix = '.html') => {
 };
 
 const download = (link) => axios.get(link, { responseType: 'arraybuffer' })
-  .then(({ data }) => data);
+  .then(({ data }) => data)
+  .catch(({ err }) => {
+    throw new Error(`Error ocurred when downloading "${link}: "${err}"`);
+  });
 
 const processAssets = (data, assetspath, link) => {
   const $ = cheerio.load(data);
@@ -58,14 +61,24 @@ const pageLoader = (link, outputDir) => {
   log(`Generated assets path: ${assetspath}`);
 
   return download(link)
-    .then((data) => fs.mkdir(assetspath).then(() => data))
+    .then((data) => fs.mkdir(assetspath)
+      .then(() => data)
+      .catch((err) => {
+        throw new Error(`Couldn't save to ${assetspath}: ${err}`);
+      }))
     .then((data) => processAssets(data, assetsDir, origin))
     .then(({ page, assetsLinks }) => fs.writeFile(filepath, page, { encoding: 'utf-8' })
-      .then(() => assetsLinks))
+      .then(() => assetsLinks)
+      .catch((err) => {
+        throw new Error(`Error when creating ${filepath}: ${err}`);
+      }))
     .then((assetsLinks) => {
       const promises = assetsLinks
         .map(({ relativePath, link: assetLink }) => download(assetLink)
-          .then((data) => fs.writeFile(path.join(outputDir, relativePath), data)));
+          .then((data) => fs.writeFile(path.join(outputDir, relativePath), data))
+          .catch((err) => {
+            throw new Error(`Error when creating ${path.join(outputDir, relativePath)}: ${err}`);
+          }));
       return Promise.all(promises);
     })
     .then(() => filename);

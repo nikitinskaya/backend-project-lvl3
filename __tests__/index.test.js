@@ -13,6 +13,7 @@ import pageLoader from '../src/index.js';
 
 const base = 'https://ru.hexlet.io';
 const link = 'https://ru.hexlet.io/courses';
+const invalidBase = 'https://example.com';
 const savedName = 'ru-hexlet-io-courses.html';
 const inputHTMLFile = 'ru-hexlet-io-courses.input.html';
 const outputHTMLFile = 'ru-hexlet-io-courses.output.html';
@@ -73,8 +74,8 @@ beforeEach(async () => {
   outputDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
-describe('positive cases', () => {
-  test('Download page', async () => {
+describe('Positive cases', () => {
+  test('Can\'t download page', async () => {
     await pageLoader(link, outputDir);
 
     const fileCreated = await fileExists(path.join(outputDir, savedName));
@@ -94,5 +95,21 @@ describe('positive cases', () => {
       const actualContent = await fs.readFile(path.join(outputDir, filename), 'utf-8');
       expect(actualContent).toEqual(data);
     }
+  });
+});
+
+describe('Negative cases', () => {
+  test.each([404, 500])('Download page errors', async (code) => {
+    nock(invalidBase).get('/').reply(code, '');
+    await expect(pageLoader(invalidBase, outputDir))
+      .rejects.toThrow();
+  });
+  test('File access errors', async () => {
+    const root = '/';
+    await expect(pageLoader(link, root))
+      .rejects.toThrow();
+
+    await expect(pageLoader(link.toString(), getFixturePath('404')))
+      .rejects.toThrow();
   });
 });
