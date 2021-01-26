@@ -16,7 +16,9 @@
   "jest": {
     "testEnvironment": "node",
     "transform": {},
-    "testMatch": ["**/?(*.)+(spec|test).[jt]s?(x)"]
+    "testMatch": [
+      "**/?(*.)+(spec|test).[jt]s?(x)"
+    ]
   },
   "repository": {
     "type": "git",
@@ -40,6 +42,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.5",
-    "commander": "^7.0.0"
+    "commander": "^7.0.0",
+    "debug": "^4.3.1"
   }
 }

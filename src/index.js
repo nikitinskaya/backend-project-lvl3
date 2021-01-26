@@ -2,6 +2,9 @@ import axios from 'axios';
 import { promises as fs } from 'fs';
 import path from 'path';
 import cheerio from 'cheerio';
+import debug from 'debug';
+
+const log = debug('page-loader');
 
 const getResourceName = (link, postfix = '.html') => {
   const { dir, name, ext } = path.parse(link);
@@ -50,7 +53,9 @@ const pageLoader = (link, outputDir) => {
   const filename = getResourceName(fileLinkWithoutProto);
   const assetsDir = getResourceName(fileLinkWithoutProto, '_files');
   const filepath = path.join(outputDir, filename);
+  log(`Generated HTML path: ${filepath}`);
   const assetspath = path.join(outputDir, assetsDir);
+  log(`Generated assets path: ${assetspath}`);
 
   return download(link)
     .then((data) => fs.mkdir(assetspath).then(() => data))
