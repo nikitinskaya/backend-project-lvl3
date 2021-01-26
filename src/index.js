@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import cheerio from 'cheerio';
 import debug from 'debug';
+import Listr from 'listr';
 
 const log = debug('page-loader');
 
@@ -16,7 +17,7 @@ const getResourceName = (link, postfix = '.html') => {
 
 const download = (link) => axios.get(link, { responseType: 'arraybuffer' })
   .then(({ data }) => data)
-  .catch(({ err }) => {
+  .catch((err) => {
     throw new Error(`Error ocurred when downloading "${link}: "${err}"`);
   });
 
@@ -74,12 +75,16 @@ const pageLoader = (link, outputDir) => {
       }))
     .then((assetsLinks) => {
       const promises = assetsLinks
-        .map(({ relativePath, link: assetLink }) => download(assetLink)
-          .then((data) => fs.writeFile(path.join(outputDir, relativePath), data))
-          .catch((err) => {
-            throw new Error(`Error when creating ${path.join(outputDir, relativePath)}: ${err}`);
-          }));
-      return Promise.all(promises);
+        .map(({ relativePath, link: assetLink }) => ({
+          title: `Downloading ${assetLink} to ${path.join(outputDir, relativePath)}`,
+          task: () => download(assetLink)
+            .then((data) => fs.writeFile(path.join(outputDir, relativePath), data))
+            .catch((err) => {
+              throw new Error(`Error when creating ${path.join(outputDir, relativePath)}: ${err}`);
+            }),
+        }));
+      const listr = new Listr(promises, { concurrent: true });
+      return listr.run();
     })
     .then(() => filename);
 };
